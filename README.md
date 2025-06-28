@@ -109,7 +109,7 @@ If you'd like to fix a bug or add a feature, please fork the repo and submit a p
 ## 📬 Contact
 
 - 👨‍💻 Developer: Ajit Yadav  
-- 📧 Email: ysjit8898@gmail.com  
+- 📧 Email: yajit8898@gmail.com  
 
 ---
 
