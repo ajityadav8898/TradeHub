@@ -56,12 +56,8 @@ Welcome to **TradeHub**, a modern web application that combines **virtual tradin
 ## 🚀 Getting Started
 
 ### 1. Clone the Repository
-git clone https://github.com/YOUR_USERNAME/TradeHub.git
+git clone https://github.com/ajityadav8898/TradeHub.git
 cd TradeHub
-
-shell
-Copy
-Edit
 
 ### 2. Install Dependencies
 
