@@ -1,0 +1,63 @@
+.tradingview-guide {
+    display: flex;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Sidebar Navigation */
+  .sidebar {
+    width: 250px;
+    background: #1E1E2D;
+    color: white;
+    padding: 20px;
+    height: 100vh;
+    position: fixed;
+  }
+  
+  .sidebar h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar ul li {
+    margin: 10px 0;
+  }
+  
+  .sidebar ul li a {
+    color: #bbb;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  
+  .sidebar ul li a:hover {
+    color: white;
+  }
+  
+  /* Main Content */
+  .content {
+    margin-left: 270px;
+    padding: 20px;
+    flex: 1;
+  }
+  
+  .content h1 {
+    font-size: 24px;
+    color: #333;
+    margin-top: 20px;
+  }
+  
+  .content p {
+    font-size: 16px;
+    color: #555;
+  }
+  
+  /* TradingView Chart */
+  #tradingview_chart {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+  }
+  

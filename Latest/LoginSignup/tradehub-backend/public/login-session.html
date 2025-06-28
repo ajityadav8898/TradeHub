@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Login Sessions</title>
+    <link rel="stylesheet" href="login-session.css">
+</head>
+<body>
+    <header>
+        <h1>Manage User Login Sessions</h1>
+        <nav>
+            <ul>
+                <li><a href="admin.html">Admin Dashboard</a></li>
+                <li><a href="ebooks.html">Manage Ebooks</a></li>
+                <li><a href="usersupport.html">Manage User Support</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Active and Past Sessions</h2>
+        <table>
+         <thead>
+             <tr>
+                 <th>Username</th>
+                 <th>Login Time</th>
+             </tr>
+         </thead>
+         <tbody id="session-table-body">
+             <!-- Data will be dynamically inserted here -->
+         </tbody>
+     </table>
+     
+    </main>
+
+    <script src="login-session.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9349e785abc9adc5',t:'MTc0NTM3NTA2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

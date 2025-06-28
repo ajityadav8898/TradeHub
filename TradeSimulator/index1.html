@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradeHub - Virtual Trading Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .tutorial-overlay {
+            background: rgba(0, 0, 0, 0.85);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+        .tutorial-step {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            transform: scale(1);
+            transition: transform 0.3s ease;
+        }
+        .highlight {
+            border: 3px solid #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.7);
+            z-index: 110;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .tooltip {
+            position: absolute;
+            background: #1f2937;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            z-index: 120;
+            max-width: 200px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        canvas {
+            max-height: 300px;
+        }
+        .theme-dark {
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --card-bg: #1f2937;
+            --border: #374151;
+            --chart-bg: #1f2937;
+        }
+        .theme-light {
+            --bg-primary: #f9fafb;
+            --bg-secondary: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+            --chart-bg: #ffffff;
+        }
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .theme-toggle {
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="theme-dark min-h-screen">
+    <div class="container mx-auto p-6 max-w-7xl">
+        <!-- Header -->
+        <header class="card bg-gradient-to-r from-blue-800 to-indigo-900 text-white p-6 rounded-xl shadow-lg mb-8 flex justify-between items-center animate-slide-in">
+            <div>
+                <h1 class="text-4xl font-bold tracking-tight">TradeHub Virtual Trading Simulator</h1>
+                <p class="text-lg mt-2">Master Indian stocks & options with ₹10,00,000 virtual cash!</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div id="marketStatus" class="text-sm font-medium"></div>
+                <button id="themeToggle" class="theme-toggle p-2 rounded-full bg-gray-700 text-white hover:bg-gray-600">
+                    <svg id="themeIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Tutorial Overlay -->
+        <div id="tutorialOverlay" class="tutorial-overlay hidden">
+            <div class="tutorial-step">
+                <h2 id="tutorialTitle" class="text-2xl font-bold mb-4"></h2>
+                <p id="tutorialText" class="mb-4 text-gray-700"></p>
+                <button id="nextTutorial" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">Next</button>
+                <button id="skipTutorial" class="text-gray-500 mt-2 underline hover:text-gray-700">Skip Tutorial</button>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <section id="dashboard" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Portfolio Summary -->
+            <div id="portfolioSummary" class="card p-6 rounded-xl shadow-lg col-span-1 animate-slide-in">
+                <h2 class="text-xl font-semibold mb-4">Portfolio Summary</h2>
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-sm text-[var(--text-secondary)]">Virtual Balance</p>
+                        <p id="balance" class="text-2xl font-bold text-green-400">₹10,00,000.00</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-[var(--text-secondary)]">Portfolio Value</p>
+                        <p id="portfolioValue" class="text-2xl font-bold text-blue-400">₹0.00</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-[var(--text-secondary)]">Total P&L</p>
+                        <p id="profitLoss" class="text-2xl font-bold text-gray-400">₹0.00</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-[var(--text-secondary)]">Today's Profit</p>
+                        <p id="todaysProfit" class="text-2xl font-bold text-yellow-400">₹0.00</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price Chart -->
+            <div id="chartSection" class="card p-6 rounded-xl shadow-lg col-span-2 animate-slide-in">
+                <h2 class="text-xl font-semibold mb-4">Price Chart</h2>
+                <select id="chartSymbol" class="mb-4 p-2 border border-[var(--border)] bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-md w-full max-w-xs">
+                    <!-- Symbols populated by JavaScript -->
+                </select>
+                <canvas id="priceChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Market Data -->
+        <section id="marketDataSection" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Stocks -->
+            <div id="stocksSection" class="card p-6 rounded-xl shadow-lg animate-slide-in">
+                <h2 class="text-xl font-semibold mb-4">Stocks</h2>
+                <div id="stocksData" class="space-y-3">
+                    <!-- Stocks data populated by JavaScript -->
+                </div>
+            </div>
+            <!-- Indexes -->
+            <div id="indexesSection" class="card p-6 rounded-xl shadow-lg animate-slide-in">
+                <h2 class="text-xl font-semibold mb-4">Indexes & Options</h2>
+                <div id="indexesData" class="space-y-3">
+                    <!-- Indexes and options populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Trading Interface -->
+        <section id="tradingInterface" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Trade Form -->
+            <div id="tradeFormSection" class="card p-6 rounded-xl shadow-lg animate-slide-in">
+                <h2 class="text-xl font-semibold mb-4">Place Trade</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-[var(--text-secondary)]">Instrument</label>
+                        <select id="instrument" class="mt-1 block w-full p-2 border border-[var(--border)] bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-md">
+                            <option value="stock">Stock</option>
+                            <option value="option">Option</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-[var(--text-secondary)]">Symbol</label>
+                        <input id="symbol" type="text" class="mt-1 block w-full p-2 border border-[var(--border)] bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-md" placeholder="e.g., RELIANCE">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-[var(--text-secondary)]">Order Type</label>
+                        <select id="orderType" class="mt-1 block w-full p-2 border border-[var(--border)] bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-md">
+                            <option value="market">Market</option>
+                            <option value="limit">Limit</option>
+                        </select>
+                    </div>
+                    <div id="limitPriceDiv" class="hidden">
+                        <label class="block text-sm font-medium text-[var(--text-secondary)]">Limit Price</label>
+                        <input id="limitPrice" type="number" step="0.01" class="mt-1 block w-full p-2 border border-[var(--border)] bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-md" placeholder="e.g., 2950.00">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-[var(--text-secondary)]">Quantity</label>
+                        <input id="quantity" type="number" min="1" class="mt-1 block w-full p-2 border border-[var(--border)] bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-md" placeholder="e.g., 10">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-[var(--text-secondary)]">Action</label>
+                        <select id="action" class="mt-1 block w-full p-2 border border-[var(--border)] bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-md">
+                            <option value="buy">Buy</option>
+                            <option value="sell">Sell</option>
+                        </select>
+                    </div>
+                    <button id="placeTrade" class="w-full bg-green-500 text-white p-2 rounded-md hover:bg-green-600 transition-colors">Place Trade</button>
+                </div>
+            </div>
+
+            <!-- Open Positions -->
+            <div id="openPositionsSection" class="card p-6 rounded-xl shadow-lg col-span-2 animate-slide-in">
+                <h2 class="text-xl font-semibold mb-4">Open Positions</h2>
+                <div id="openPositions" class="space-y-3">
+                    <!-- Open positions populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic P&L and Portfolio -->
+        <section id="pnlPortfolioSection" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Dynamic P&L -->
+            <div id="pnlSection" class="card p-6 rounded-xl shadow-lg animate-slide-in">
+                <h2 class="text-xl font-semibold mb-4">Dynamic Profit & Loss</h2>
+                <div id="pnlData" class="space-y-3">
+                    <!-- P&L data populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Portfolio Table -->
+            <div id="portfolioSection" class="card p-6 rounded-xl shadow-lg animate-slide-in">
+                <h2 class="text-xl font-semibold mb-4">Your Portfolio</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-[var(--bg-secondary)]">
+                                <th class="p-3">Symbol</th>
+                                <th class="p-3">Type</th>
+                                <th class="p-3">Qty</th>
+                                <th class="p-3">Avg. Price</th>
+                                <th class="p-3">Current</th>
+                                <th class="p-3">P&L</th>
+                            </tr>
+                        </thead>
+                        <tbody id="portfolioTable">
+                            <!-- Portfolio data populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Community Discussion -->
+        <section id="communitySection" class="card p-6 rounded-xl shadow-lg mb-8 animate-slide-in">
+            <h2 class="text-xl font-semibold mb-4">Community Discussion</h2>
+            <div class="space-y-4">
+                <div class="flex space-x-4">
+                    <input id="discussionInput" type="text" class="flex-1 p-2 border border-[var(--border)] bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-md" placeholder="Share your trade ideas or ask questions...">
+                    <button id="postDiscussion" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">Post</button>
+                </div>
+                <div id="discussionFeed" class="space-y-3">
+                    <!-- Discussion posts populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Mock market data
+        const stocks = [
+            { symbol: 'RELIANCE', type: 'Stock', price: 2950.50, margin: 0.2, history: [] },
+            { symbol: 'TCS', type: 'Stock', price: 4200.75, margin: 0.2, history: [] },
+            { symbol: 'HDFCBANK', type: 'Stock', price: 1650.30, margin: 0.2, history: [] },
+            { symbol: 'INFY', type: 'Stock', price: 1850.45, margin: 0.2, history: [] }
+        ];
+        const indexes = [
+            {
+                symbol: 'NIFTY',
+                type: 'Index',
+                price: 25000,
+                margin: 0.5,
+                history: [],
+                options: [
+                    { symbol: 'NIFTY_CE_25000', type: 'Option', price: 120.45, margin: 0.5, history: [] },
+                    { symbol: 'NIFTY_PE_25000', type: 'Option', price: 100.30, margin: 0.5, history: [] }
+                ]
+            },
+            {
+                symbol: 'BANKNIFTY',
+                type: 'Index',
+                price: 51000,
+                margin: 0.5,
+                history: [],
+                options: [
+                    { symbol: 'BANKNIFTY_CE_51000', type: 'Option', price: 200.60, margin: 0.5, history: [] },
+                    { symbol: 'BANKNIFTY_PE_51000', type: 'Option', price: 180.75, margin: 0.5, history: [] }
+                ]
+            }
+        ];
+
+        // User data
+        let virtualBalance = 1000000;
+        let portfolio = [];
+        let openPositions = [];
+        let trades = []; // Track all trades for profit calculation
+        let todaysProfit = 0;
+        let discussionPosts = [
+            { user: 'TraderX', text: 'Bullish on RELIANCE! Expecting a breakout above ₹3000 soon.', time: new Date().toLocaleString() }
+        ];
+
+        // DOM elements
+        const balanceEl = document.getElementById('balance');
+        const portfolioValueEl = document.getElementById('portfolioValue');
+        const profitLossEl = document.getElementById('profitLoss');
+        const todaysProfitEl = document.getElementById('todaysProfit');
+        const stocksDataEl = document.getElementById('stocksData');
+        const indexesDataEl = document.getElementById('indexesData');
+        const pnlDataEl = document.getElementById('pnlData');
+        const portfolioTableEl = document.getElementById('portfolioTable');
+        const openPositionsEl = document.getElementById('openPositions');
+        const placeTradeBtn = document.getElementById('placeTrade');
+        const instrumentEl = document.getElementById('instrument');
+        const symbolEl = document.getElementById('symbol');
+        const orderTypeEl = document.getElementById('orderType');
+        const limitPriceDiv = document.getElementById('limitPriceDiv');
+        const limitPriceEl = document.getElementById('limitPrice');
+        const quantityEl = document.getElementById('quantity');
+        const actionEl = document.getElementById('action');
+        const chartSymbolEl = document.getElementById('chartSymbol');
+        const discussionInputEl = document.getElementById('discussionInput');
+        const postDiscussionBtn = document.getElementById('postDiscussion');
+        const discussionFeedEl = document.getElementById('discussionFeed');
+        const marketStatusEl = document.getElementById('marketStatus');
+        const tutorialOverlay = document.getElementById('tutorialOverlay');
+        const tutorialTitle = document.getElementById('tutorialTitle');
+        const tutorialText = document.getElementById('tutorialText');
+        const nextTutorialBtn = document.getElementById('nextTutorial');
+        const skipTutorialBtn = document.getElementById('skipTutorial');
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+
+        // Chart setup
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        const priceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Price (₹)',
+                    data: [],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: false,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { display: true, title: { display: true, text: 'Time', color: 'var(--text-secondary)' } },
+                    y: { display: true, title: { display: true, text: 'Price (₹)', color: 'var(--text-secondary)' } }
+                },
+                plugins: {
+                    legend: { labels: { color: 'var(--text-primary)' } }
+                },
+                backgroundColor: 'var(--chart-bg)'
+            }
+        });
+
+        // Theme management
+        function setTheme(theme) {
+            document.body.classList.remove('theme-dark', 'theme-light');
+            document.body.classList.add(`theme-${theme}`);
+            localStorage.setItem('theme', theme);
+            themeIcon.innerHTML = theme === 'dark' ?
+                `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>` :
+                `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>`;
+            priceChart.options.scales.x.title.color = getComputedStyle(document.body).getPropertyValue('--text-secondary');
+            priceChart.options.scales.y.title.color = getComputedStyle(document.body).getPropertyValue('--text-secondary');
+            priceChart.options.plugins.legend.labels.color = getComputedStyle(document.body).getPropertyValue('--text-primary');
+            updateChart(chartSymbolEl.value);
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = document.body.classList.contains('theme-dark') ? 'dark' : 'light';
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        });
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        // Tutorial steps
+        const tutorialSteps = [
+            {
+                title: 'Welcome to TradeHub!',
+                text: 'This platform simulates real trading with Indian stocks and options. Start by checking your portfolio summary.',
+                highlight: 'portfolioSummary',
+                tooltip: { id: 'balance', text: 'Your virtual cash for trading.', position: 'right' }
+            },
+            {
+                title: 'Explore Market Data',
+                text: 'View real-time prices for stocks and index options. Click a symbol to view its chart or trade.',
+                highlight: 'marketDataSection',
+                tooltip: { id: 'stocksData', text: 'Click a symbol to view its chart.', position: 'top' }
+            },
+            {
+                title: 'Analyze with Charts',
+                text: 'Track price movements with the line chart to analyze trends.',
+                highlight: 'chartSection',
+                tooltip: { id: 'chartSymbol', text: 'Select a symbol to view its price chart.', position: 'top' }
+            },
+            {
+                title: 'Place a Trade',
+                text: 'Buy or sell using market or limit orders. Enter a symbol, quantity, and action.',
+                highlight: 'tradeFormSection',
+                tooltip: { id: 'orderType', text: 'Limit orders let you set a specific price.', position: 'right' }
+            },
+            {
+                title: 'Manage Open Positions',
+                text: 'Monitor your trades, sell positions, or set stop-losses here.',
+                highlight: 'openPositionsSection',
+                tooltip: { id: 'openPositions', text: 'Click to sell or set stop-loss.', position: 'top' }
+            },
+            {
+                title: 'Track P&L',
+                text: 'The Profit & Loss section updates dynamically as prices change, showing your gains or losses.',
+                highlight: 'pnlSection',
+                tooltip: { id: 'pnlData', text: 'Reflects unrealized gains/losses.', position: 'top' }
+            },
+            {
+                title: 'View Your Portfolio',
+                text: 'See your holdings, average prices, and P&L.',
+                highlight: 'portfolioSection',
+                tooltip: { id: 'portfolioTable', text: 'View your current holdings.', position: 'top' }
+            },
+            {
+                title: 'Join the Community',
+                text: 'Share trade ideas and learn from others in the discussion forum.',
+                highlight: 'communitySection',
+                tooltip: { id: 'discussionInput', text: 'Post your thoughts or questions.', position: 'top' }
+            }
+        ];
+        let currentTutorialStep = 0;
+
+        // Start tutorial
+        function startTutorial() {
+            tutorialOverlay.classList.remove('hidden');
+            showTutorialStep(currentTutorialStep);
+        }
+
+        // Show tutorial step
+        function showTutorialStep(step) {
+            const { title, text, highlight, tooltip } = tutorialSteps[step];
+            tutorialTitle.textContent = title;
+            tutorialText.textContent = text;
+
+            // Remove previous highlight and tooltip
+            document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
+            document.querySelectorAll('.tooltip').forEach(el => el.remove());
+
+            // Add highlight
+            const highlightEl = document.getElementById(highlight);
+            if (highlightEl) {
+                highlightEl.classList.add('highlight');
+                highlightEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            // Add tooltip
+            if (tooltip) {
+                const targetEl = document.getElementById(tooltip.id);
+                if (targetEl) {
+                    const tooltipEl = document.createElement('div');
+                    tooltipEl.className = 'tooltip';
+                    tooltipEl.textContent = tooltip.text;
+                    tooltipEl.style.position = 'absolute';
+                    if (tooltip.position === 'right') {
+                        tooltipEl.style.left = `${targetEl.offsetWidth + 10}px`;
+                        tooltipEl.style.top = `${targetEl.offsetTop}px`;
+                    } else if (tooltip.position === 'top') {
+                        tooltipEl.style.bottom = `${targetEl.offsetHeight + 10}px`;
+                        tooltipEl.style.left = `${targetEl.offsetLeft}px`;
+                    }
+                    targetEl.parentElement.appendChild(tooltipEl);
+                }
+            }
+
+            // Update button text for last step
+            nextTutorialBtn.textContent = step === tutorialSteps.length - 1 ? 'Finish' : 'Next';
+        }
+
+        // Next tutorial step
+        nextTutorialBtn.addEventListener('click', () => {
+            currentTutorialStep++;
+            if (currentTutorialStep < tutorialSteps.length) {
+                showTutorialStep(currentTutorialStep);
+            } else {
+                tutorialOverlay.classList.add('hidden');
+                document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
+                document.querySelectorAll('.tooltip').forEach(el => el.remove());
+            }
+        });
+
+        // Skip tutorial
+        skipTutorialBtn.addEventListener('click', () => {
+            tutorialOverlay.classList.add('hidden');
+            document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
+            document.querySelectorAll('.tooltip').forEach(el => el.remove());
+        });
+
+        // Update order type input
+        orderTypeEl.addEventListener('change', () => {
+            limitPriceDiv.classList.toggle('hidden', orderTypeEl.value === 'market');
+        });
+
+        // Simulate market status
+        function updateMarketStatus() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const isMarketOpen = hours >= 9 && hours < 15 || (hours === 15 && minutes <= 30);
+            marketStatusEl.textContent = `Market: ${isMarketOpen ? 'Open' : 'Closed'}`;
+            marketStatusEl.className = `text-sm font-medium ${isMarketOpen ? 'text-green-400' : 'text-red-400'}`;
+        }
+
+        // Get market item
+        function getMarketItem(symbol) {
+            let item = stocks.find(s => s.symbol === symbol);
+            if (item) return item;
+            for (let index of indexes) {
+                item = index.options.find(opt => opt.symbol === symbol) || (index.symbol === symbol ? index : null);
+                if (item) return item;
+            }
+            return null;
+        }
+
+        // Render market data
+        function renderMarketData() {
+            // Stocks
+            stocksDataEl.innerHTML = '';
+            stocks.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between p-3 bg-[var(--bg-secondary)] rounded-md hover:bg-opacity-80 transition-colors cursor-pointer';
+                div.innerHTML = `
+                    <span>${item.symbol}</span>
+                    <span>₹${item.price.toFixed(2)}</span>
+                `;
+                div.addEventListener('click', () => {
+                    symbolEl.value = item.symbol;
+                    instrumentEl.value = 'stock';
+                    updateChart(item.symbol);
+                });
+                stocksDataEl.appendChild(div);
+            });
+
+            // Indexes and Options
+            indexesDataEl.innerHTML = '';
+            indexes.forEach(index => {
+                const indexDiv = document.createElement('div');
+                indexDiv.className = 'p-3 bg-[var(--bg-secondary)] rounded-md mb-2';
+                indexDiv.innerHTML = `
+                    <div class="flex justify-between cursor-pointer hover:bg-opacity-80 transition-colors">
+                        <span>${index.symbol}</span>
+                        <span>₹${index.price.toFixed(2)}</span>
+                    </div>
+                `;
+                indexDiv.addEventListener('click', () => {
+                    symbolEl.value = index.symbol;
+                    instrumentEl.value = 'index';
+                    updateChart(index.symbol);
+                });
+
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'ml-4 mt-2 space-y-2';
+                index.options.forEach(opt => {
+                    const optDiv = document.createElement('div');
+                    optDiv.className = 'flex justify-between p-2 bg-[var(--bg-secondary)] rounded-md hover:bg-opacity-80 transition-colors cursor-pointer';
+                    optDiv.innerHTML = `
+                        <span>${opt.symbol}</span>
+                        <span>₹${opt.price.toFixed(2)}</span>
+                    `;
+                    optDiv.addEventListener('click', () => {
+                        symbolEl.value = opt.symbol;
+                        instrumentEl.value = 'option';
+                        updateChart(opt.symbol);
+                    });
+                    optionsDiv.appendChild(optDiv);
+                });
+                indexDiv.appendChild(optionsDiv);
+                indexesDataEl.appendChild(indexDiv);
+            });
+        }
+
+        // Render chart symbols
+        function renderChartSymbols() {
+            chartSymbolEl.innerHTML = '';
+            stocks.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.symbol;
+                option.textContent = item.symbol;
+                chartSymbolEl.appendChild(option);
+            });
+            indexes.forEach(index => {
+                const indexOption = document.createElement('option');
+                indexOption.value = index.symbol;
+                indexOption.textContent = index.symbol;
+                chartSymbolEl.appendChild(indexOption);
+                index.options.forEach(opt => {
+                    const optOption = document.createElement('option');
+                    optOption.value = opt.symbol;
+                    optOption.textContent = opt.symbol;
+                    chartSymbolEl.appendChild(optOption);
+                });
+            });
+        }
+
+        // Update chart
+        function updateChart(symbol) {
+            const item = getMarketItem(symbol);
+            if (!item) return;
+            chartSymbolEl.value = symbol;
+            const labels = item.history.map((_, i) => i);
+            priceChart.data.labels = labels;
+            priceChart.data.datasets = [{
+                label: `${symbol} Price (₹)`,
+                data: item.history,
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                fill: false,
+                tension: 0.1
+            }];
+            priceChart.update();
+        }
+
+        // Render dynamic P&L
+        function renderPnL() {
+            pnlDataEl.innerHTML = '';
+            portfolio.forEach(item => {
+                const currentPrice = getMarketItem(item.symbol)?.price || item.avgPrice;
+                const pl = (currentPrice - item.avgPrice) * item.quantity;
+                const div = document.createElement('div');
+                div.className = 'flex justify-between p-3 bg-[var(--bg-secondary)] rounded-md';
+                div.innerHTML = `
+                    <span>${item.symbol} (${item.type})</span>
+                    <span class="${pl >= 0 ? 'text-green-400' : 'text-red-400'}">₹${pl.toFixed(2)}</span>
+                `;
+                pnlDataEl.appendChild(div);
+            });
+        }
+
+        // Render portfolio
+        function renderPortfolio() {
+            portfolioTableEl.innerHTML = '';
+            let totalPortfolioValue = 0;
+            let totalProfitLoss = 0;
+
+            portfolio.forEach(item => {
+                const currentPrice = getMarketItem(item.symbol)?.price || item.avgPrice;
+                const pl = (currentPrice - item.avgPrice) * item.quantity;
+                totalPortfolioValue += currentPrice * item.quantity;
+                totalProfitLoss += pl;
+
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-[var(--bg-secondary)] hover:bg-opacity-80 transition-colors';
+                row.innerHTML = `
+                    <td class="p-3">${item.symbol}</td>
+                    <td class="p-3">${item.type}</td>
+                    <td class="p-3">${item.quantity}</td>
+                    <td class="p-3">₹${item.avgPrice.toFixed(2)}</td>
+                    <td class="p-3">₹${currentPrice.toFixed(2)}</td>
+                    <td class="p-3 ${pl >= 0 ? 'text-green-400' : 'text-red-400'}">₹${pl.toFixed(2)}</td>
+                `;
+                portfolioTableEl.appendChild(row);
+            });
+
+            // Update summary
+            balanceEl.textContent = `₹${virtualBalance.toFixed(2)}`;
+            portfolioValueEl.textContent = `₹${totalPortfolioValue.toFixed(2)}`;
+            profitLossEl.textContent = `₹${totalProfitLoss.toFixed(2)}`;
+            profitLossEl.className = `text-2xl font-bold ${totalProfitLoss >= 0 ? 'text-green-400' : 'text-red-400'}`;
+            todaysProfitEl.textContent = `₹${todaysProfit.toFixed(2)}`;
+            todaysProfitEl.className = `text-2xl font-bold ${todaysProfit >= 0 ? 'text-green-400' : 'text-red-400'}`;
+        }
+
+        // Render open positions
+        function renderOpenPositions() {
+            openPositionsEl.innerHTML = '';
+            openPositions.forEach((pos, index) => {
+                const currentPrice = getMarketItem(pos.symbol)?.price || pos.entryPrice;
+                const pl = pos.action === 'buy' ? (currentPrice - pos.entryPrice) * pos.quantity : (pos.entryPrice - currentPrice) * pos.quantity;
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center p-3 bg-[var(--bg-secondary)] rounded-md';
+                div.innerHTML = `
+                    <div>
+                        <span>${pos.symbol} (${pos.type})</span>
+                        <span class="ml-2">${pos.orderType} ${pos.action.toUpperCase()}</span>
+                        <span class="ml-2">Qty: ${pos.quantity}</span>
+                        <span class="ml-2">Entry: ₹${pos.entryPrice.toFixed(2)}</span>
+                        <span class="ml-2">Current: ₹${currentPrice.toFixed(2)}</span>
+                        <span class="ml-2 ${pl >= 0 ? 'text-green-400' : 'text-red-400'}">P&L: ₹${pl.toFixed(2)}</span>
+                        ${pos.stopLoss ? `<span class="ml-2">Stop-Loss: ₹${pos.stopLoss.toFixed(2)}</span>` : ''}
+                    </div>
+                    <div class="space-x-2">
+                        ${pos.orderType === 'market' ? `<button class="sell-position bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600" data-index="${index}">Sell</button>` : ''}
+                        ${pos.orderType === 'market' ? `<button class="set-stoploss text-blue-400 hover:underline" data-index="${index}">Set Stop-Loss</button>` : ''}
+                        ${pos.orderType === 'limit' ? `<button class="cancel-order text-red-400 hover:underline" data-index="${index}">Cancel</button>` : ''}
+                    </div>
+                `;
+                openPositionsEl.appendChild(div);
+            });
+        }
+
+        // Render discussion feed
+        function renderDiscussionFeed() {
+            discussionFeedEl.innerHTML = '';
+            discussionPosts.forEach(post => {
+                const div = document.createElement('div');
+                div.className = 'p-3 bg-[var(--bg-secondary)] rounded-md';
+                div.innerHTML = `
+                    <div class="flex justify-between">
+                        <span class="font-semibold">${post.user}</span>
+                        <span class="text-sm text-[var(--text-secondary)]">${post.time}</span>
+                    </div>
+                    <p class="mt-1">${post.text}</p>
+                `;
+                discussionFeedEl.appendChild(div);
+            });
+        }
+
+        // Simulate price changes
+        function simulatePriceChanges() {
+            stocks.forEach(item => {
+                const changePercent = (Math.random() * 1.5 + 0.5) * (Math.random() > 0.5 ? 1 : -1);
+                item.price = Math.max(1, item.price * (1 + changePercent / 100));
+                item.history.push(item.price);
+                if (item.history.length > 50) item.history.shift();
+            });
+            indexes.forEach(index => {
+                const changePercent = (Math.random() * 1.5 + 0.5) * (Math.random() > 0.5 ? 1 : -1);
+                index.price = Math.max(1, index.price * (1 + changePercent / 100));
+                index.history.push(index.price);
+                if (index.history.length > 50) index.history.shift();
+                index.options.forEach(opt => {
+                    const optChange = (Math.random() * 2 + 0.5) * (Math.random() > 0.5 ? 1 : -1);
+                    opt.price = Math.max(1, opt.price * (1 + optChange / 100));
+                    opt.history.push(opt.price);
+                    if (opt.history.length > 50) opt.history.shift();
+                });
+            });
+            renderMarketData();
+            renderPnL();
+            renderPortfolio();
+            updateChart(chartSymbolEl.value);
+            checkOpenPositions();
+        }
+
+        // Check open positions for limit orders and stop-loss
+        function checkOpenPositions() {
+            openPositions = openPositions.filter((pos, index) => {
+                const marketItem = getMarketItem(pos.symbol);
+                if (!marketItem) return false;
+                const currentPrice = marketItem.price;
+                let execute = false;
+
+                // Check limit orders
+                if (pos.orderType === 'limit') {
+                    if (pos.action === 'buy' && currentPrice <= pos.entryPrice) execute = true;
+                    if (pos.action === 'sell' && currentPrice >= pos.entryPrice) execute = true;
+                }
+
+                // Check stop-loss for market orders
+                if (pos.orderType === 'market' && pos.stopLoss) {
+                    if (pos.action === 'buy' && currentPrice <= pos.stopLoss) execute = true;
+                    if (pos.action === 'sell' && currentPrice >= pos.stopLoss) execute = true;
+                }
+
+                if (execute) {
+                    executeTrade(pos, currentPrice, index);
+                    return false;
+                }
+                return true;
+            });
+            renderOpenPositions();
+        }
+
+        // Execute trade
+        function executeTrade(pos, price, index) {
+            const totalCost = price * pos.quantity;
+            const realizedPL = pos.action === 'buy' ? (price - pos.entryPrice) * pos.quantity : (pos.entryPrice - price) * pos.quantity;
+
+            if (pos.action === 'buy') {
+                virtualBalance += totalCost;
+                trades.push({
+                    symbol: pos.symbol,
+                    type: pos.type,
+                    quantity: pos.quantity,
+                    entryPrice: pos.entryPrice,
+                    exitPrice: price,
+                    pl: realizedPL,
+                    date: new Date()
+                });
+                if (isToday(new Date())) {
+                    todaysProfit += realizedPL;
+                }
+                const existingPosition = portfolio.find(item => item.symbol === pos.symbol && item.type === pos.type);
+                if (existingPosition) {
+                    existingPosition.quantity -= pos.quantity;
+                    if (existingPosition.quantity <= 0) {
+                        portfolio = portfolio.filter(item => item !== existingPosition);
+                    }
+                }
+            } else {
+                virtualBalance -= totalCost;
+                trades.push({
+                    symbol: pos.symbol,
+                    type: pos.type,
+                    quantity: pos.quantity,
+                    entryPrice: pos.entryPrice,
+                    exitPrice: price,
+                    pl: realizedPL,
+                    date: new Date()
+                });
+                if (isToday(new Date())) {
+                    todaysProfit += realizedPL;
+                }
+                const existingPosition = portfolio.find(item => item.symbol === pos.symbol && item.type === pos.type);
+                if (existingPosition) {
+                    const newQuantity = existingPosition.quantity + pos.quantity;
+                    existingPosition.avgPrice = ((existingPosition.avgPrice * existingPosition.quantity) + totalCost) / newQuantity;
+                    existingPosition.quantity = newQuantity;
+                } else {
+                    portfolio.push({
+                        symbol: pos.symbol,
+                        type: pos.type,
+                        quantity: pos.quantity,
+                        avgPrice: price
+                    });
+                }
+            }
+            renderPnL();
+            renderPortfolio();
+            renderOpenPositions();
+        }
+
+        // Check if date is today
+        function isToday(date) {
+            const today = new Date();
+            return date.getDate() === today.getDate() &&
+                   date.getMonth() === today.getMonth() &&
+                   date.getFullYear() === today.getFullYear();
+        }
+
+        // Handle trade
+        placeTradeBtn.addEventListener('click', () => {
+            const instrument = instrumentEl.value;
+            const symbol = symbolEl.value.toUpperCase();
+            const orderType = orderTypeEl.value;
+            const quantity = parseInt(quantityEl.value);
+            const action = actionEl.value;
+            const limitPrice = orderType === 'limit' ? parseFloat(limitPriceEl.value) : null;
+
+            if (!symbol || isNaN(quantity) || quantity <= 0 || (orderType === 'limit' && (!limitPrice || limitPrice <= 0))) {
+                alert('Please enter valid symbol, quantity, and price (if applicable).');
+                return;
+            }
+
+            const marketItem = getMarketItem(symbol);
+            if (!marketItem) {
+                alert('Instrument not found in market data.');
+                return;
+            }
+
+            const price = orderType === 'market' ? marketItem.price : limitPrice;
+            const totalCost = price * quantity;
+            const marginRequired = totalCost * marketItem.margin;
+
+            if (orderType === 'market') {
+                if (action === 'buy') {
+                    if (marginRequired > virtualBalance) {
+                        alert('Insufficient virtual balance.');
+                        return;
+                    }
+                    virtualBalance -= totalCost;
+                    const existingPosition = portfolio.find(item => item.symbol === symbol && item.type === instrument);
+                    if (existingPosition) {
+                        const newQuantity = existingPosition.quantity + quantity;
+                        existingPosition.avgPrice = ((existingPosition.avgPrice * existingPosition.quantity) + totalCost) / newQuantity;
+                        existingPosition.quantity = newQuantity;
+                    } else {
+                        portfolio.push({
+                            symbol,
+                            type: instrument,
+                            quantity,
+                            avgPrice: price
+                        });
+                    }
+                    openPositions.push({
+                        symbol,
+                        type: instrument,
+                        orderType,
+                        action,
+                        quantity,
+                        entryPrice: price,
+                        stopLoss: null
+                    });
+                } else {
+                    const existingPosition = portfolio.find(item => item.symbol === symbol && item.type === instrument);
+                    if (!existingPosition || existingPosition.quantity < quantity) {
+                        alert('Not enough quantity to sell.');
+                        return;
+                    }
+                    virtualBalance += totalCost;
+                    trades.push({
+                        symbol,
+                        type: instrument,
+                        quantity,
+                        entryPrice: existingPosition.avgPrice,
+                        exitPrice: price,
+                        pl: (price - existingPosition.avgPrice) * quantity,
+                        date: new Date()
+                    });
+                    if (isToday(new Date())) {
+                        todaysProfit += (price - existingPosition.avgPrice) * quantity;
+                    }
+                    existingPosition.quantity -= quantity;
+                    if (existingPosition.quantity <= 0) {
+                        portfolio = portfolio.filter(item => item !== existingPosition);
+                    }
+                    openPositions.push({
+                        symbol,
+                        type: instrument,
+                        orderType,
+                        action,
+                        quantity,
+                        entryPrice: price,
+                        stopLoss: null
+                    });
+                }
+                renderPnL();
+                renderPortfolio();
+                renderOpenPositions();
+            } else {
+                openPositions.push({
+                    symbol,
+                    type: instrument,
+                    orderType,
+                    action,
+                    quantity,
+                    entryPrice: limitPrice,
+                    stopLoss: null
+                });
+                renderOpenPositions();
+            }
+        });
+
+        // Handle open positions actions
+        openPositionsEl.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            const pos = openPositions[index];
+            if (!pos) return;
+
+            if (e.target.classList.contains('sell-position')) {
+                const marketItem = getMarketItem(pos.symbol);
+                if (!marketItem) {
+                    alert('Market data not found.');
+                    return;
+                }
+                const totalCost = marketItem.price * pos.quantity;
+                const realizedPL = pos.action === 'buy' ? (marketItem.price - pos.entryPrice) * pos.quantity : (pos.entryPrice - marketItem.price) * pos.quantity;
+                
+                if (pos.action === 'buy') {
+                    virtualBalance += totalCost;
+                    trades.push({
+                        symbol: pos.symbol,
+                        type: pos.type,
+                        quantity: pos.quantity,
+                        entryPrice: pos.entryPrice,
+                        exitPrice: marketItem.price,
+                        pl: realizedPL,
+                        date: new Date()
+                    });
+                    if (isToday(new Date())) {
+                        todaysProfit += realizedPL;
+                    }
+                    const existingPosition = portfolio.find(item => item.symbol === pos.symbol && item.type === pos.type);
+                    if (existingPosition) {
+                        existingPosition.quantity -= pos.quantity;
+                        if (existingPosition.quantity <= 0) {
+                            portfolio = portfolio.filter(item => item !== existingPosition);
+                        }
+                    }
+                } else {
+                    virtualBalance -= totalCost;
+                    trades.push({
+                        symbol: pos.symbol,
+                        type: pos.type,
+                        quantity: pos.quantity,
+                        entryPrice: pos.entryPrice,
+                        exitPrice: marketItem.price,
+                        pl: realizedPL,
+                        date: new Date()
+                    });
+                    if (isToday(new Date())) {
+                        todaysProfit += realizedPL;
+                    }
+                    const existingPosition = portfolio.find(item => item.symbol === pos.symbol && item.type === pos.type);
+                    if (existingPosition) {
+                        const newQuantity = existingPosition.quantity + pos.quantity;
+                        existingPosition.avgPrice = ((existingPosition.avgPrice * existingPosition.quantity) + totalCost) / newQuantity;
+                        existingPosition.quantity = newQuantity;
+                    } else {
+                        portfolio.push({
+                            symbol: pos.symbol,
+                            type: pos.type,
+                            quantity: pos.quantity,
+                            avgPrice: marketItem.price
+                        });
+                    }
+                }
+                openPositions.splice(index, 1);
+                renderPnL();
+                renderPortfolio();
+                renderOpenPositions();
+            } else if (e.target.classList.contains('set-stoploss')) {
+                const stopLossPrice = prompt(`Enter stop-loss price for ${pos.symbol}:`);
+                const price = parseFloat(stopLossPrice);
+                if (isNaN(price) || price <= 0) {
+                    alert('Invalid stop-loss price.');
+                    return;
+                }
+                pos.stopLoss = price;
+                renderOpenPositions();
+            } else if (e.target.classList.contains('cancel-order')) {
+                openPositions.splice(index, 1);
+                renderOpenPositions();
+            }
+        });
+
+        // Handle discussion post
+        postDiscussionBtn.addEventListener('click', () => {
+            const text = discussionInputEl.value.trim();
+            if (!text) {
+                alert('Please enter a message.');
+                return;
+            }
+            discussionPosts.unshift({
+                user: 'You',
+                text,
+                time: new Date().toLocaleString()
+            });
+            discussionInputEl.value = '';
+            renderDiscussionFeed();
+        });
+
+        // Initialize
+        stocks.forEach(item => item.history = [item.price]);
+        indexes.forEach(index => {
+            index.history = [index.price];
+            index.options.forEach(opt => opt.history = [opt.price]);
+        });
+        renderMarketData();
+        renderChartSymbols();
+        updateChart(stocks[0].symbol);
+        renderPnL();
+        renderPortfolio();
+        renderOpenPositions();
+        renderDiscussionFeed();
+        updateMarketStatus();
+        startTutorial();
+
+        // Simulate price updates every 3 seconds
+        setInterval(simulatePriceChanges, 3000);
+        setInterval(updateMarketStatus, 60000);
+    </script>
+</body>
+</html>

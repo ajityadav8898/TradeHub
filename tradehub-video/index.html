@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading eBooks</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-300 font-sans">
+    <!-- Header -->
+    <header class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-3xl font-bold">Trading eBooks</h1>
+            <p class="mt-2">Explore trading resources</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Cards Section -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="cards-container">
+            <!-- Cards will be dynamically loaded here -->
+        </section>
+    </main>
+
+    <script>
+        // Load cards from localStorage
+        function loadCards() {
+            const cardsContainer = document.getElementById('cards-container');
+            cardsContainer.innerHTML = '';
+            const cards = JSON.parse(localStorage.getItem('tradingCards') || '[]');
+            cards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'bg-white rounded-lg shadow-md p-4 card-hover relative';
+                cardElement.innerHTML = `
+                    <img src="${card.thumbnail}" alt="${card.title}" class="w-full h-48 object-cover rounded-md mb-2">
+                    <h3 class="text-lg font-semibold">${card.title}</h3>
+                    <button onclick="playVideo(${index})" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Start</button>
+                `;
+                cardsContainer.appendChild(cardElement);
+
+                // Add video container below the card
+                const videoContainer = document.createElement('div');
+                videoContainer.id = `video-container-${index}`;
+                videoContainer.className = 'hidden mt-4';
+                cardsContainer.appendChild(videoContainer);
+            });
+        }
+
+        // Play video
+        function playVideo(index) {
+            try {
+                const cards = JSON.parse(localStorage.getItem('tradingCards') || '[]');
+                if (index < 0 || index >= cards.length) throw new Error('Invalid card index');
+                let youtubeUrl = cards[index].youtubeUrl;
+                console.log('Attempting to play video at index:', index, 'with URL:', youtubeUrl);
+
+                // Convert youtu.be URL to embed URL
+                if (youtubeUrl.includes('youtu.be/')) {
+                    const videoId = youtubeUrl.split('youtu.be/')[1].split('?')[0];
+                    youtubeUrl = `https://www.youtube.com/embed/${videoId}`;
+                }
+                // Convert watch URL to embed URL if necessary
+                else if (youtubeUrl.includes('watch?v=')) {
+                    youtubeUrl = youtubeUrl.replace('watch?v=', 'embed/');
+                    if (!youtubeUrl.includes('https://www.youtube.com/embed/')) {
+                        youtubeUrl = 'https://www.youtube.com/embed/' + youtubeUrl.split('v=')[1].split('&')[0];
+                    }
+                }
+
+                const videoContainer = document.getElementById(`video-container-${index}`);
+                videoContainer.innerHTML = `
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <iframe src="${youtubeUrl}" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen 
+                                class="w-full h-72 rounded-md">
+                        </iframe>
+                    </div>
+                `;
+                videoContainer.classList.remove('hidden');
+                console.log('Video player loaded for index:', index, 'with URL:', youtubeUrl);
+            } catch (error) {
+                console.error('Error playing video:', error);
+                alert('Failed to play video. Check the YouTube URL or try again.');
+            }
+        }
+
+        // Initialize cards on page load
+        document.addEventListener('DOMContentLoaded', loadCards);
+    </script>
+</body>
+</html>

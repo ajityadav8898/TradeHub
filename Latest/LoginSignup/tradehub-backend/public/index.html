@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">  
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TradeHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
+  <!-- Font ICON Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- <style>
+    .user-profile {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+    }
+
+    .profile-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .profile-btn i {
+      color: white;
+    }
+
+    .profile-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      background-color: white;
+      min-width: 150px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .dropdown-menu a,
+    .dropdown-menu button {
+      display: block;
+      padding: 10px;
+      text-align: left;
+      width: 100%;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      color: black;
+      font-size: 16px;
+    }
+
+    .dropdown-menu button {
+      color: red;
+    }
+
+    .dropdown-menu a:hover,
+    .dropdown-menu button:hover {
+      background-color: #f1f1f1;
+    }
+
+    .dropdown-menu.show {
+      display: block;
+    }
+  </style> -->
+</head> 
+
+<body>
+  <div id="nav">
+    <h1>TradeHub</h1>
+    <a href="#home">Home</a>
+    <a href="https://tradehub-tutorial.netlify.app/">Tutorials</a>
+    <a href="https://tradehub-chart.netlify.app/">Charts</a>
+    <a href="http://localhost:3000/">E-Books</a>
+    <a href="index1.html">Paper-Trade</a>
+    <a href="http://localhost:3001/user-chat">Contact Us</a>
+    <!-- <a href="index1.html">Trade</a> -->
+    <!-- <button type="button" id="login">
+      <i class="bi bi-person-circle" id="loginicon"></i>&nbsp; Login
+    </button> -->
+    <button type="button" id="signup">
+      <i class="bi bi-person-circle" id="signicon"></i>&nbsp;Log Out
+    </button>
+    <!-- <div class="user-profile">
+      <div class="profile-dropdown">
+        <button class="profile-btn">
+          <i class="bi bi-person-circle"></i>
+        </button>
+        <div class="dropdown-menu">
+          <a href="http://localhost:3000/profile">My Profile</a>
+          <button id="logout">Log Out</button>
+        </div>
+      </div>
+    </div> -->
+
+  </div>
+  
+
+  <div id="cursor"></div>
+  <div id="cursor-blur"></div>
+  <video src="Introvideo.mp4" autoplay muted loop></video>
+  <div id="main">
+    <div id="page1">
+      <!-- <h1>Trade Hub</h1> -->
+      <h2>Options / Futures / Equity</h2>
+      <p>
+        A trusted and secure Educational Trading Platform 
+      </p>
+    </div>
+    <div id="page2">
+      <div id="scroller">
+        <div id="scroller-in">
+          <h4>BankNifty</h4>
+          <h4>Nifty</h4>
+          <h4>Finnifty</h4>
+          <h4>MidCapNifty</h4>
+          <h4>Sensex</h4>
+          <h4>Bankex</h4>
+        </div>
+        <div id="scroller-in">
+          <h4>BankNifty</h4>
+          <h4>Nifty</h4>
+          <h4>Finnifty</h4>
+          <h4>MidCapNifty</h4>
+          <h4>Sensex</h4>
+          <h4>Bankex</h4>
+        </div>
+       
+      </div>
+      <div id="about-us">
+        <img src="GreenBullFigure1.jpeg" alt="GreenBullFigure">
+         <div id="about-us-in">
+           <h3>About Us</h3>
+           <p> "TradeHub is an educational trading platform designed to empower users with resources like eBooks, live market charts, and personalized dashboards. Our mission is to simplify trading concepts and provide an interactive learning experience for aspiring traders."</p>
+         </div>
+         <img src="RedBullFigure1.jpeg" alt="RedBearFigure">
+       </div>
+      <!-- <div id="index-summary">
+        <h4> Indexes in Stock Market</h4>
+      </div>  -->
+
+      <div class="cards-container"  id="cards-container1">
+        <div class="cards" id="card1">
+          <div class="overlay">
+            <h4>BankNifty</h4>
+            <p>Tracks the performance of the most liquid and large-cap banking stocks listed on NSE</p>
+          </div>
+        </div>
+        <div class="cards" id="card2">
+          <div class="overlay">
+            <h4>Nifty</h4>
+            <p>A benchmark index representing the top 50 companies across 13 sectors listed on NSE.</p>
+          </div>
+        </div>
+        <div class="cards" id="card3">
+          <div class="overlay">
+            <h4>Sensex</h4>
+            <p>India's oldest stock market index, representing 30 well-established companies listed on BSE.</p>
+          </div>
+        </div>
+        
+
+      </div>
+      <div class="cards-container" id="cards-container2">
+        <div class="cards" id="card4">
+          <div class="overlay">
+            <h4>MidCapNifty</h4>
+            <p>Represents the performance of the top 100 mid-sized companies listed on NSE</p>
+          </div>
+        </div>
+        <div class="cards" id="card5">
+          <div class="overlay">
+            <h4>Finnifty</h4>
+            <p>Tracks the financial services sector, including banks, insurance, and other financial institutions</p>
+          </div>
+        </div>
+        <div class="cards" id="card6">
+          <div class="overlay">
+            <h4>Bankex</h4>
+            <p> Tracks the financial services sector, including banks, insurance, and other financial institutions.</p>
+          </div>
+        </div>
+        
+
+      </div>
+    </div>
+    <div id="page3">
+    </div>
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-about">
+          <h3>About TradeHub</h3>
+          <p>TradeHub is an educational platform to help users learn and explore trading concepts through interactive tools and resources.</p>
+        </div>
+        <div class="footer-links">
+          <h3>Quick Links</h3>
+          <ul>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/ebooks">eBooks</a></li>
+            <li><a href="/live-charts">Live Charts</a></li>
+            <li><a href="/profile">Profile</a></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h3>Contact Us</h3>
+          <ul>
+            <li>Email: yajit8898@gmail.com</li>
+            <li>Phone:7021971478</li>
+            <li>Address: Navi Mumbai, India</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 TradeHub. All Rights Reserved.</p>
+      </div>
+    </footer>
+    
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
+    integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"
+    integrity="sha512-onMTRKJBKz8M1TnqqDuGBlowlH0ohFzMXYRNebz+yOcc5TQr/zAKsthzhuv0hiyUKEiQEQXEynnXCvNTOk50dg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- <script>
+      // Toggle dropdown menu
+      document.querySelector(".profile-btn").addEventListener("click", function () {
+        document.querySelector(".dropdown-menu").classList.toggle("show");
+      });
+  
+      // Hide dropdown when clicking outside
+      document.addEventListener("click", function (event) {
+        if (!event.target.closest(".profile-dropdown")) {
+          document.querySelector(".dropdown-menu").classList.remove("show");
+        }
+      });
+  
+      // Logout button functionality
+      document.getElementById("signup").addEventListener("click", function () {
+        alert("Logging out...");
+        window.location.href = "http://127.0.0.1:5555/Latest/Landing%20Page/index.html"; // Redirect to login page
+      });
+  </script> --> 
+  <script>
+    document.getElementById("signup").addEventListener("click", async function () {
+    try {
+        const userId = localStorage.getItem("userId");
+
+        if (!userId) {
+            alert("User Not Found! Please log in again.");
+            window.location.href = "http://127.0.0.1:5555/Latest/Landing%20Page/index.html";
+            return;
+        }
+
+        const response = await fetch("http://localhost:5000/api/auth/logout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert(data.message);
+            localStorage.removeItem("token");
+            localStorage.removeItem("userId");
+            window.location.href = "http://127.0.0.1:5555/Latest/Landing%20Page/index.html"; // Redirect to login
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        console.error("Logout Error:", error);
+    }
+});
+
+    
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const token = localStorage.getItem("token");
+        const username = localStorage.getItem("username");
+
+        if (token) {
+            document.getElementById("login-btn").style.display = "none"; // Hide login button
+            document.getElementById("logout-btn").style.display = "block"; // Show logout button
+            document.getElementById("welcome-user").innerText = `Welcome, ${username}`;
+        }
+    });
+  </script>
+
+
+  <script src="script.js"></script>
+</body>
+
+</html>
+<!--OK -->
