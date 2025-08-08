@@ -1,6 +1,4 @@
-Certainly! Here is your README formatted in clean Markdown structure, ready to be used as your GitHub README.md file. All sections use proper Markdown syntax, headers, and formatting for optimal readability and presentation.
 
-***
 
 # 📊 TradeHub - Virtual Trading & Learning Platform
 
